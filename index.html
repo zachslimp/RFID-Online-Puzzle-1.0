@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Curator's Cabinet</title>
+<!-- A museum that shouldn't exist. -->
+<meta name="author" content="The Curator">
+<meta name="note" content="The fish never lie.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --paper: #f5efe0;
+    --aged: #e8dcc8;
+    --gold: #c9933a;
+    --amber: #e07b2a;
+    --teal: #3a7a7c;
+    --silver: #8a9aaa;
+    --faded: #7a6a54;
+    --red: #8b2020;
+    --border: #c4b090;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    padding: 2rem 1rem;
+  }
+
+  #cabinet {
+    background-color: var(--paper);
+    max-width: 680px;
+    width: 100%;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 0 6px var(--ink), 0 0 0 8px var(--border), 8px 12px 40px rgba(0,0,0,0.7);
+    padding: 3rem 3.5rem;
+    position: relative;
+  }
+
+  #cabinet::before {
+    content: '';
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 1px solid var(--border);
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  .scene-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--faded);
+    margin-bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .scene-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h1.title {
+    font-size: 1.9rem;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.8rem;
+    color: var(--faded);
+    font-style: italic;
+    margin-bottom: 2.2rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .prose {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--ink);
+    margin-bottom: 1.4rem;
+  }
+
+  .prose em {
+    font-style: italic;
+    color: var(--faded);
+  }
+
+  .note {
+    background: var(--aged);
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.2rem;
+    margin: 1.6rem 0;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  .note .note-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-top: 2rem;
+  }
+
+  .choice-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.9rem 1.2rem;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    line-height: 1.5;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+  }
+
+  .choice-btn:hover {
+    background: var(--aged);
+    border-color: var(--gold);
+  }
+
+  .choice-btn .choice-key {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--faded);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .outcome-bad {
+    background: var(--aged);
+    border: 1px solid var(--silver);
+    padding: 1.4rem 1.6rem;
+    margin-top: 1.6rem;
+    color: var(--ink);
+  }
+
+  .outcome-bad .outcome-head {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 0.8rem;
+  }
+
+  .outcome-good {
+    background: var(--aged);
+    border: 1px solid var(--gold);
+    padding: 1.4rem 1.6rem;
+    margin-top: 1.6rem;
+  }
+
+  .outcome-good .outcome-head {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+  }
+
+  .btn-restart, .btn-continue, .btn-next {
+    margin-top: 1.4rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.65rem 1.4rem;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--faded);
+    transition: all 0.15s;
+  }
+  .btn-restart:hover, .btn-continue:hover, .btn-next:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--aged);
+  }
+
+  .btn-next {
+    color: var(--ink);
+    border-color: var(--gold);
+  }
+
+  .win-box {
+    text-align: center;
+  }
+  .win-box h2 {
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .win-box .coordinates {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    background: var(--ink);
+    color: var(--gold);
+    padding: 1.6rem 2rem;
+    text-align: left;
+    margin: 1.4rem 0;
+    border: 1px solid var(--gold);
+    letter-spacing: 0.04em;
+  }
+
+  .attempt-counter {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.72rem;
+    color: var(--faded);
+    text-align: right;
+    margin-top: 2rem;
+    letter-spacing: 0.08em;
+  }
+
+  .italic { font-style: italic; }
+  .amber-word { color: var(--amber); font-weight: 700; }
+  .silver-word { color: var(--silver); }
+  .gold-word { color: var(--gold); }
+
+  /* Subtle flicker on page load */
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.85; }
+    94% { opacity: 1; }
+    97% { opacity: 0.9; }
+    98% { opacity: 1; }
+  }
+  #cabinet { animation: flicker 8s infinite; }
+
+  @media (max-width: 500px) {
+    #cabinet { padding: 2rem 1.4rem; }
+    h1.title { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div id="cabinet">
+  <div id="game"></div>
+  <div class="attempt-counter" id="counter"></div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  attempts: parseInt(localStorage.getItem('curator_attempts') || '0'),
+  scene: 'intro',
+  // Tracks which failure-clues the player has seen this run
+  // (used to slightly vary text on repeat visits)
+};
+
+function saveAttempts() {
+  localStorage.setItem('curator_attempts', state.attempts);
+}
+
+// ─── Render helpers ───────────────────────────────────────────────────────────
+const game = document.getElementById('game');
+const counter = document.getElementById('counter');
+
+function updateCounter() {
+  if (state.attempts === 0) { counter.textContent = ''; return; }
+  counter.textContent = `attempt ${state.attempts}`;
+}
+
+function render(html) {
+  game.innerHTML = html;
+  updateCounter();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function btn(id, label, sub) {
+  return `<button class="choice-btn" onclick="go('${id}')">
+    <span class="choice-key">${sub}</span>
+    ${label}
+  </button>`;
+}
+
+function label(text) {
+  return `<div class="scene-label">${text}</div>`;
+}
+
+// ─── Scenes ───────────────────────────────────────────────────────────────────
+
+const scenes = {
+
+  // ── INTRO ──────────────────────────────────────────────────────────────────
+  intro() {
+    render(`
+      ${label('The Curator\'s Cabinet')}
+      <h1 class="title">You are inside a museum<br>that should not exist.</h1>
+      <div class="subtitle">A puzzle in six rooms. Bring a pencil.</div>
+      <hr class="divider">
+      <p class="prose">
+        The last thing you remember is a door — <span class="italic">amber-framed, half-open</span> — and the smell of camphor and old leather. Now you stand in a foyer of impossible dimensions, surrounded by exhibits that shift when you aren't looking directly at them.
+      </p>
+      <p class="prose">
+        A placard on the wall reads: <em>"The Curator thanks you for your visit. He has stepped out. Please do not touch the birds."</em>
+      </p>
+      <p class="prose">
+        Three corridors stretch ahead. Each is marked by the dim glow of a lamp above its archway.
+      </p>
+      <div class="choices">
+        ${btn('foyer_silver', 'Enter the corridor beneath the <strong>silver</strong> lamp', 'Option I')}
+        ${btn('foyer_amber', 'Enter the corridor beneath the <strong>amber</strong> lamp', 'Option II')}
+        ${btn('foyer_blue', 'Enter the corridor beneath the <strong>blue-grey</strong> lamp', 'Option III')}
+      </div>
+    `);
+  },
+
+  // ── FOYER WRONG: SILVER ────────────────────────────────────────────────────
+  foyer_silver() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('The Foyer — Corridor I')}
+      <h1 class="title">The silver lamp flickers and dies.</h1>
+      <hr class="divider">
+      <p class="prose">The corridor smells of iron. Halfway down, a display case holds a taxidermied <strong>blue heron</strong> — its glass eyes tracking you. The plaque beneath it reads: <em>"Patience is a virtue of the incorrect."</em></p>
+      <p class="prose">The floor opens. You fall. The museum swallows you whole.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">You wake again in the foyer. The amber lamp glows steadily above the second archway. You notice, for the first time, that it is the only lamp that did not flicker when you entered.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── FOYER WRONG: BLUE ─────────────────────────────────────────────────────
+  foyer_blue() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('The Foyer — Corridor III')}
+      <h1 class="title">The blue-grey lamp hums a low, warning note.</h1>
+      <hr class="divider">
+      <p class="prose">The corridor is wallpapered in a pattern of silver fish — <span class="italic">thousands of them</span> — all swimming in the same direction. Away from you.</p>
+      <p class="prose">A sign reads: <em>"This way leads deeper."</em> You take three steps and find yourself back at the beginning, facing the same three archways.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">The fish on that wallpaper were swimming <em>away</em> from the corridor. Perhaps the fish know something you don't. The amber lamp still burns, unwavering.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── FOYER CORRECT: AMBER ──────────────────────────────────────────────────
+  foyer_amber() {
+    render(`
+      ${label('The Foyer — Corridor II')}
+      <h1 class="title">The amber lamp warms your hands as you pass beneath it.</h1>
+      <hr class="divider">
+      <p class="prose">The corridor smells of sandalwood and old paper. Display cases line the walls — a collection of bronze compasses, a jar of golden beetles, an <span class="italic">amber</span>-handled penknife. Everything here is the colour of late afternoon.</p>
+      <p class="prose">At the end of the corridor, a door stands open. Above it, a carved fish — mouth open, as though mid-sentence.</p>
+      <button class="btn-next" onclick="go('clocks')">Pass through the door →</button>
+    `);
+  },
+
+  // ── HALL OF CLOCKS ────────────────────────────────────────────────────────
+  clocks() {
+    render(`
+      ${label('Room II — The Hall of Clocks')}
+      <h1 class="title">Every clock in this room shows a different time.</h1>
+      <hr class="divider">
+      <p class="prose">There are hundreds of them — grandfather clocks, pocket watches pinned to velvet, a cuckoo clock whose door opens and closes on its own, though nothing emerges. None of them tick.</p>
+      <p class="prose">Three levers protrude from the far wall. Beside each, a small placard.</p>
+      <div class="note">
+        <div class="note-label">Placard I</div>
+        A painted bluebird perches above this lever. Beneath: <em>"Time stopped here at the third hour."</em>
+      </div>
+      <div class="note">
+        <div class="note-label">Placard II</div>
+        A painted goldfish circles above this lever. Beneath: <em>"Time stopped here at the third hour."</em>
+      </div>
+      <div class="note">
+        <div class="note-label">Placard III</div>
+        A painted grey swan preens above this lever. Beneath: <em>"Time stopped here at the third hour."</em>
+      </div>
+      <p class="prose" style="margin-top:1.4rem">All three placards say the same thing. But the paintings above them are quite different.</p>
+      <div class="choices">
+        ${btn('clocks_bird1', 'Pull the lever beneath the <strong>bluebird</strong>', 'Lever I')}
+        ${btn('clocks_fish', 'Pull the lever beneath the <strong>goldfish</strong>', 'Lever II')}
+        ${btn('clocks_bird2', 'Pull the lever beneath the <strong>grey swan</strong>', 'Lever III')}
+      </div>
+    `);
+  },
+
+  // ── CLOCKS WRONG: BLUEBIRD ────────────────────────────────────────────────
+  clocks_bird1() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room II — Wrong Lever')}
+      <h1 class="title">Every clock begins ticking — backwards.</h1>
+      <hr class="divider">
+      <p class="prose">The bluebird's painted eye seems to wink. The hands of every clock spin in reverse. The room folds inward like a closing book.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">The bluebird lied. You recall the Curator's note in the foyer: <em>"Please do not touch the birds."</em> Perhaps that extends to trusting them. The goldfish placard said the same words — but the goldfish has never led you anywhere false.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── CLOCKS WRONG: SWAN ────────────────────────────────────────────────────
+  clocks_bird2() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room II — Wrong Lever')}
+      <h1 class="title">The swan painting begins to move.</h1>
+      <hr class="divider">
+      <p class="prose">The grey swan stretches its neck and opens its beak. It honks, once — a sound like a door slamming in an empty house. All the clocks fall off the walls simultaneously.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">A swan is a bird. The Curator's warning returns to you. You think of the goldfish wallpaper in the first corridor — the fish swimming away from danger. Fish seem to know. Birds seem to mislead.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── CLOCKS CORRECT: FISH ──────────────────────────────────────────────────
+  clocks_fish() {
+    render(`
+      ${label('Room II — Correct Lever')}
+      <h1 class="title">One clock begins to tick — forward.</h1>
+      <hr class="divider">
+      <p class="prose">A single grandfather clock at the room's centre begins to move. Its pendulum swings with a deep, reassuring <em>thunk</em>. A compartment opens in its base, revealing a short staircase downward.</p>
+      <p class="prose">The goldfish in the painting seems to drift contentedly.</p>
+      <button class="btn-next" onclick="go('taxidermy')">Descend the staircase →</button>
+    `);
+  },
+
+  // ── TAXIDERMY ROOM ────────────────────────────────────────────────────────
+  taxidermy() {
+    render(`
+      ${label('Room III — The Taxidermy Room')}
+      <h1 class="title">Things here are preserved. Not everything should be.</h1>
+      <hr class="divider">
+      <p class="prose">Glass cases hold animals mid-motion: a fox leaping, a rabbit frozen in alarm, a crow with wings spread. All of them have been here a very long time. The smell of camphor is overwhelming.</p>
+      <p class="prose">In the centre of the room, three objects sit on a long mahogany table, each with a tag tied to it with <span class="italic">gold</span> thread. You may examine one.</p>
+      <div class="choices">
+        ${btn('tax_compass', 'The brass compass with an <strong>amber</strong> inlay dial', 'Object I')}
+        ${btn('tax_mirror', 'The hand mirror with a <strong>silver</strong> frame, tarnished at the edges', 'Object II')}
+        ${btn('tax_box', 'The small lacquered box, painted <strong>blue-grey</strong>, sealed with a clasp', 'Object III')}
+      </div>
+    `);
+  },
+
+  // ── TAXIDERMY WRONG: MIRROR ───────────────────────────────────────────────
+  tax_mirror() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room III — Object II')}
+      <h1 class="title">Your reflection does not move when you do.</h1>
+      <hr class="divider">
+      <p class="prose">The silver mirror shows your face — but the reflection's expression is wrong. Placid. Unconcerned. It tilts its head as you reach for the mirror. When your fingers touch the frame, the cold travels up your arm to your shoulder and doesn't stop.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">The silver frame. The cold. You've noticed a pattern: the silver lamp, the silver fish that fled, the silver lever's cousin — <em>cool colours seem to resist you here.</em> The compass with its amber dial was right there on the table.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── TAXIDERMY WRONG: BOX ─────────────────────────────────────────────────
+  tax_box() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room III — Object III')}
+      <h1 class="title">The clasp opens on its own.</h1>
+      <hr class="divider">
+      <p class="prose">Inside the blue-grey box is a note that reads: <em>"You are still choosing incorrectly. Warmth is the key. Warmth has always been the key."</em> Below the note is a small painting of a crow. The box closes. The crow watches.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">The box told you directly: warmth. Amber is warm. Gold is warm. Cool colours — blue-grey, silver — have blocked you every time. The note was a gift. The crow was a warning.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── TAXIDERMY CORRECT: COMPASS ────────────────────────────────────────────
+  tax_compass() {
+    render(`
+      ${label('Room III — Object I')}
+      <h1 class="title">The compass needle points somewhere that is not north.</h1>
+      <hr class="divider">
+      <p class="prose">The amber dial is warm to the touch — warmer than the room. The needle spins once, twice, then locks, pointing toward the far wall where a door has appeared that wasn't there before.</p>
+      <p class="prose">Carved above the door: a fish, mouth open. And beneath it, scratched into the stone in small, urgent letters: <em>"In the office, count the windows."</em></p>
+      <button class="btn-next" onclick="go('office')">Follow the compass →</button>
+    `);
+  },
+
+  // ── CURATOR'S OFFICE ──────────────────────────────────────────────────────
+  office() {
+    render(`
+      ${label('Room IV — The Curator\'s Office')}
+      <h1 class="title">The Curator left in a hurry.</h1>
+      <hr class="divider">
+      <p class="prose">Papers everywhere. A half-eaten biscuit. A coat still on its hook. Three notes are pinned to a corkboard above the desk, each written in a different hand — as though the Curator wrote them at different times, or in different states of mind.</p>
+      <div class="note">
+        <div class="note-label">Note A</div>
+        <em>"Reminder: the second exhibit must be wound clockwise. Also — do not feed the bird in case four. There are <strong>nine</strong> windows on the east wall, though only three face outward. Trust the smallest number."</em>
+      </div>
+      <div class="note">
+        <div class="note-label">Note B</div>
+        <em>"The fish in Room 7 have been restless. I have counted them: <strong>forty-one</strong>. That number is not right for this museum. The first is always the truest."</em>
+      </div>
+      <div class="note">
+        <div class="note-label">Note C</div>
+        <em>"If anyone finds this: the lock on the final door requires three answers. Each answer is a position. Remember — the Curator's notes always give the position plainly, though never obviously. I have left <strong>seven</strong> keys, but only one door. Take the one that faces the warmth."</em>
+      </div>
+      <p class="prose" style="margin-top:1.4rem">There is one window in this room. It faces west. The setting sun comes through it — <span class="italic">amber light</span> across the desk.</p>
+      <p class="prose">You may take one of the three notes with you.</p>
+      <div class="choices">
+        ${btn('office_a', 'Take <strong>Note A</strong>', 'Note A')}
+        ${btn('office_b', 'Take <strong>Note B</strong>', 'Note B')}
+        ${btn('office_c', 'Take <strong>Note C</strong>', 'Note C')}
+      </div>
+    `);
+  },
+
+  // ── OFFICE WRONG: NOTE A ─────────────────────────────────────────────────
+  office_a() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room IV — Note A')}
+      <h1 class="title">Nine windows. You trusted the largest number.</h1>
+      <hr class="divider">
+      <p class="prose">Note A tells you to trust the smallest number. You take it and proceed — but in the corridor ahead, a door asks you which exhibit number to enter. You say nine. The door disagrees.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">Note A said <em>"trust the smallest number"</em> — and then gave you nine and three. Three is smaller. But Note A was written by a bird-keeper, and the birds have not been your friends. Note B mentioned fish. Note C mentioned the final door directly and spoke of warmth. One note knows more than it should.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── OFFICE WRONG: NOTE B ─────────────────────────────────────────────────
+  office_b() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room IV — Note B')}
+      <h1 class="title">Forty-one fish. A promising number.</h1>
+      <hr class="divider">
+      <p class="prose">Note B speaks of fish, which have guided you well. But when you reach the corridor, the note's number — forty-one — produces nothing. The museum hums disapprovingly. "The first is always the truest," the note says. Perhaps the first note you should have trusted is the one that addressed you directly.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">Fish are truthful — but Note B's fish are restless, uncountable, uncertain. Note C was written specifically for <em>whoever finds this.</em> It spoke of the final door, of positions, of warmth. It is the only note addressed to you.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── OFFICE CORRECT: NOTE C ───────────────────────────────────────────────
+  office_c() {
+    render(`
+      ${label('Room IV — Note C')}
+      <h1 class="title">Seven keys. One door. The one that faces the warmth.</h1>
+      <hr class="divider">
+      <p class="prose">Note C folds neatly into your pocket. The warmth of the amber window seems to follow you as you leave the office.</p>
+      <p class="prose">You understand now: the Curator's notes always contain a number, and that number is a position. Note C said <em>seven.</em> You file that away.</p>
+      <p class="prose">Ahead: a long, strange corridor.</p>
+      <button class="btn-next" onclick="go('corridor')">Enter the corridor →</button>
+    `);
+  },
+
+  // ── THE STRANGE CORRIDOR ─────────────────────────────────────────────────
+  corridor() {
+    render(`
+      ${label('Room V — The Strange Corridor')}
+      <h1 class="title">Three paintings. One way forward.</h1>
+      <hr class="divider">
+      <p class="prose">The corridor is long and lit by sconces. Three large paintings hang side by side, floor to ceiling, each depicting a different scene. A plaque below all three reads: <em>"Pass through the true one."</em></p>
+      <p class="prose"><strong>Painting I</strong> — A golden meadow. In the foreground, a fisherman sits beside a river, pulling in a catch. His net is full. He looks content. The light is amber. The river runs toward you.</p>
+      <p class="prose"><strong>Painting II</strong> — A silver forest at night. A flock of starlings fills the sky, each bird painted with extraordinary care. The moon is large and white. The trees are bare. Something at the edge of the frame has been partially painted over.</p>
+      <p class="prose"><strong>Painting III</strong> — A grey cliff above a grey sea. A single lighthouse blinks, blue-white. A boat below it flies a pennant that, on closer inspection, depicts a small heron.</p>
+      <div class="choices">
+        ${btn('corr_fish', 'Step into <strong>Painting I</strong> — the golden meadow', 'Painting I')}
+        ${btn('corr_birds', 'Step into <strong>Painting II</strong> — the silver forest', 'Painting II')}
+        ${btn('corr_grey', 'Step into <strong>Painting III</strong> — the grey cliff', 'Painting III')}
+      </div>
+    `);
+  },
+
+  // ── CORRIDOR WRONG: BIRDS ────────────────────────────────────────────────
+  corr_birds() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room V — Painting II')}
+      <h1 class="title">The starlings scatter the moment you enter.</h1>
+      <hr class="divider">
+      <p class="prose">The silver forest is cold. The starlings — hundreds of birds — rise in a murmuration that blocks the moon. In the darkness that follows, you hear the Curator's voice for the first time: <em>"Not the birds. Never the birds."</em></p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">The Curator himself confirms it. The fish painting — the fisherman, the amber light, the river flowing toward you — that was warm, that had a fish. The grey cliff had a heron on the pennant. Birds and cool colours together — the wrong combination twice over.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── CORRIDOR WRONG: GREY ─────────────────────────────────────────────────
+  corr_grey() {
+    state.attempts++; saveAttempts();
+    render(`
+      ${label('Room V — Painting III')}
+      <h1 class="title">The lighthouse goes dark the moment you enter.</h1>
+      <hr class="divider">
+      <p class="prose">The grey cliff is cold and wet. The heron on the pennant turns its head and watches you. The boat drifts. You realise there is no shore on the other side of this painting — only more grey sea, forever.</p>
+      <div class="outcome-bad">
+        <div class="outcome-head">— Reset —</div>
+        <p class="prose" style="margin:0">Grey, heron, blue-white light — three wrong signals at once. The fisherman in Painting I had none of these. He had amber light, a fish in his net, and a river running toward you. That painting was practically an instruction.</p>
+      </div>
+      <button class="btn-restart" onclick="go('intro')">Begin again</button>
+    `);
+  },
+
+  // ── CORRIDOR CORRECT: FISH ───────────────────────────────────────────────
+  corr_fish() {
+    render(`
+      ${label('Room V — Painting I')}
+      <h1 class="title">The meadow is warm. The fisherman nods.</h1>
+      <hr class="divider">
+      <p class="prose">You step through the canvas. The amber light is real — you can feel it. The fisherman doesn't look up, but he gestures with one hand toward a path at the meadow's edge.</p>
+      <p class="prose">The path leads to a door in the hillside. Solid iron. Three locks, side by side. Each lock has a number dial, set to zero.</p>
+      <p class="prose">Beside the door, etched into the hillside stone, three lines:</p>
+      <div class="note">
+        <div class="note-label">Inscription</div>
+        <em>The first lock remembers where you entered.<br>
+        The second lock remembers what the fish told you.<br>
+        The third lock remembers what the Curator left behind.</em>
+      </div>
+      <button class="btn-next" onclick="go('door')">Approach the three locks →</button>
+    `);
+  },
+
+  // ── THE FINAL DOOR ────────────────────────────────────────────────────────
+  door() {
+    render(`
+      ${label('Room VI — The Final Door')}
+      <h1 class="title">Three locks. Three numbers. You have all of them.</h1>
+      <hr class="divider">
+      <p class="prose">The inscription told you what each lock requires. Think carefully.</p>
+      <p class="prose"><em>The first lock remembers where you entered</em> — the foyer. Three corridors. Which position was the correct one?</p>
+      <p class="prose"><em>The second lock remembers what the fish told you</em> — the Hall of Clocks. Three levers. The fish-painted lever. Which position was it?</p>
+      <p class="prose"><em>The third lock remembers what the Curator left behind</em> — the office. Three notes. Note C told you the Curator's notes always give a number. What number was in Note C?</p>
+      <p class="prose" style="font-style:italic; color: var(--faded);">Set the three dials.</p>
+      <div style="display:flex; gap:1rem; margin-top:1.6rem; flex-wrap:wrap">
+        <div style="flex:1; min-width:100px">
+          <label style="font-family:'Courier Prime',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--faded); display:block; margin-bottom:0.5rem">Lock I</label>
+          <input type="number" id="lock1" min="1" max="9" placeholder="?" style="width:100%; border:1px solid var(--border); background:var(--aged); padding:0.7rem; font-family:'Courier Prime',monospace; font-size:1.1rem; text-align:center; color:var(--ink);">
+        </div>
+        <div style="flex:1; min-width:100px">
+          <label style="font-family:'Courier Prime',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--faded); display:block; margin-bottom:0.5rem">Lock II</label>
+          <input type="number" id="lock2" min="1" max="9" placeholder="?" style="width:100%; border:1px solid var(--border); background:var(--aged); padding:0.7rem; font-family:'Courier Prime',monospace; font-size:1.1rem; text-align:center; color:var(--ink);">
+        </div>
+        <div style="flex:1; min-width:100px">
+          <label style="font-family:'Courier Prime',monospace; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--faded); display:block; margin-bottom:0.5rem">Lock III</label>
+          <input type="number" id="lock3" min="1" max="9" placeholder="?" style="width:100%; border:1px solid var(--border); background:var(--aged); padding:0.7rem; font-family:'Courier Prime',monospace; font-size:1.1rem; text-align:center; color:var(--ink);">
+        </div>
+      </div>
+      <button class="btn-next" style="margin-top:1.4rem" onclick="checkDoor()">Turn all three dials →</button>
+      <div id="door-feedback" style="margin-top:1rem"></div>
+    `);
+  },
+
+  // ── WIN ───────────────────────────────────────────────────────────────────
+  win() {
+    localStorage.removeItem('curator_attempts');
+    state.attempts = 0;
+    render(`
+      ${label('The Cabinet Opens')}
+      <div class="win-box">
+        <h2>The door swings open.</h2>
+        <p class="prose">Beyond it is not a room. It is an afternoon — real, golden, the smell of grass and river water. The fisherman from the painting is there. He hands you a folded card.</p>
+        <p class="prose"><em>On it, in the Curator's hand:</em></p>
+        <div class="coordinates">
+Congratulations.<br><br>
+The coordinates for May are:<br><br>
+P: 1, 3, 5, 6, 8, 9, 11, 17, 22, 23, 24, 25, 26, 27, 28, 30, 31<br><br>
+Q: 1, 2, 3, 7, 9, 11, 12, 14, 18, 23, 25, 26, 28, 29, 30, 33<br><br>
+R: 1, 2, 5, 6, 10, 12, 14, 19, 20, 21, 24, 26, 27, 28, 30, 31, 32, 33
+        </div>
+        <p class="prose" style="font-style:italic; color:var(--faded)">The Curator is still out. Perhaps he always will be.<br>But you found your way regardless.</p>
+      </div>
+    `);
+  }
+};
+
+// ─── Door check ───────────────────────────────────────────────────────────────
+// Lock I:  amber lamp = option 2 → answer: 2
+// Lock II: goldfish lever = lever 2 → answer: 2
+// Lock III: Note C said "seven" → answer: 7
+function checkDoor() {
+  const l1 = parseInt(document.getElementById('lock1').value);
+  const l2 = parseInt(document.getElementById('lock2').value);
+  const l3 = parseInt(document.getElementById('lock3').value);
+  const fb = document.getElementById('door-feedback');
+
+  if (l1 === 2 && l2 === 2 && l3 === 7) {
+    go('win');
+  } else {
+    state.attempts++; saveAttempts(); updateCounter();
+    let hints = [];
+    if (l1 !== 2) hints.push('The first lock groans — wrong position remembered.');
+    if (l2 !== 2) hints.push('The second lock resists — the fish gave you a clearer answer.');
+    if (l3 !== 7) hints.push('The third lock holds — re-read what the Curator left behind.');
+    fb.innerHTML = `<div class="outcome-bad"><div class="outcome-head">— The door does not open —</div><p class="prose" style="margin:0">${hints.join('<br>')}</p></div>`;
+  }
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function go(scene) {
+  if (scenes[scene]) {
+    state.scene = scene;
+    scenes[scene]();
+  }
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+go('intro');
+</script>
+</body>
+</html>
+Done
